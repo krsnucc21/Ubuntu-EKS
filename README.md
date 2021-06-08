@@ -11,14 +11,16 @@ AWS Packer scrips support Intel-based instances by default. For Graviton2 or ARM
 ## Step 1: Update VPC and subnet IDs in Makefile
 
 Change the VPC_ID, SUBNET_ID, and AWS_REGION properly. Note that the subnet for a packer instance must support automatic public IP assignment. Please check if the automatic public IP assignment is ON.
-Here is an example of the head of Makefile
-
+Here is an example of the head of Makefile:
 ```
 VPC_ID := vpc-0eccdebe81b47954f
 SUBNET_ID := subnet-048d6fdc454a3c3c5
 AWS_REGION := us-east-1
-The packer configuration files (*.json) support the x86 processor. For Graviton, you need to change the arch and ami variables:
+```
+
+The packer configuration files (.json) support the x86 processor. For Graviton, you need to change the arch and ami variables:
 Edit “amazon-eks-node-ubuntu2004.json” as follows:
+```
 22,23c22,23
 <     "source_ami_arch":"x86_64",
 <     "source_ami_name":"ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*",
