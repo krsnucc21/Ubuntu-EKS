@@ -33,20 +33,24 @@ Edit “amazon-eks-node-ubuntu2004.json” as follows:
 >       "instance_type":"c6g.large",
 ```
 
-## Step 2: Change a script to install ARM-based 'jq'
+## Step 2: Change a script to install ARM-based 'jq' and change DNS reference for kubelet
 
-The packer script puts ‘jq’ for json data but it installs Intel-based jq which doesn’t work when ‘/etc/eks/ bootstrap.sh’ runs. The bootstrap fails and can’t register this instance to a cluster.
+The packer script puts ‘jq’ for json data but it installs Intel-based jq which doesn’t work when ‘/etc/eks/ bootstrap.sh’ runs. The bootstrap fails and can’t register this instance to a cluster. In addition, kubelet on Ubuntu has a cycle DNS reference problem. To fix this issue, we make kubelet refer to another file where doens't have a DNS server entry pointing to self. For more information about the cyclic reference issue, please take a look at the article found [here](https://github.com/coredns/coredns/blob/master/plugin/loop/README.md)
  
-To fix this, you can change the code lines in ‘files/functions.sh’ as follows:
+Change the code lines in ‘scripts/ubuntu2004/boilerplate.sh’ as follows:
 ```
-vi files/functions.sh
+vi scripts/ubuntu2004/boilerplate.sh
 ---
-"files/functions.sh" 485 lines --54%--
-install_jq() {
-    #curl -sL -o /usr/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
-    #chmod +x /usr/bin/jq
-    apt-get install -y jq
-}
+24c24,25
+< install_jq
+---
+> #install_jq
+> apt-get install -y jq
+36a38,41
+> 
+> # make kubelet refer to another resolv.conf in order to prevent DNS looping (please read https://github.com/coredns/coredns/blob/master/plugin/loop/README.md)
+> sed '/KUBELET_ARGS/ s/'"'"'$/'" --resolv-conf=\/run\/systemd\/resolve\/resolv.conf'"'/' /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf > /tmp/10-kubelet-args.conf
+> mv /tmp/10-kubelet-args.conf /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf
 ---
 ```
 
