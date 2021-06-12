@@ -56,7 +56,8 @@ vi scripts/shared/eks.sh
 > # make kubelet refer to another resolv.conf in order to prevent DNS looping (please read https://github.com/coredns/coredns/blob/master/plugin/loop/README.md)
 > sed '/KUBELET_ARGS/ s/'"'"'$/'" --resolv-conf=\/run\/systemd\/resolve\/resolv.conf'"'/' /etc/eks/bootstrap.sh > /tmp/bootstrap.sh
 > mv /tmp/bootstrap.sh /etc/eks/bootstrap.sh
->---
+>
+---
 ```
 
 ## Step 3: Bake your AMI
