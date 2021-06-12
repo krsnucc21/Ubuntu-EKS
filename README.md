@@ -37,7 +37,7 @@ Edit “amazon-eks-node-ubuntu2004.json” as follows:
 
 The packer script puts ‘jq’ for json data but it installs Intel-based jq which doesn’t work when ‘/etc/eks/ bootstrap.sh’ runs. The bootstrap fails and can’t register this instance to a cluster. In addition, kubelet on Ubuntu has a cycle DNS reference problem. To fix this issue, we make kubelet refer to another file where doens't have a DNS server entry pointing to self. For more information about the cyclic reference issue, please take a look at the article found [here](https://github.com/coredns/coredns/blob/master/plugin/loop/README.md)
  
-Change the code lines in ‘scripts/ubuntu2004/boilerplate.sh’ as follows:
+Change the code line in ‘scripts/ubuntu2004/boilerplate.sh’ as follows:
 ```
 vi scripts/ubuntu2004/boilerplate.sh
 ---
@@ -46,12 +46,17 @@ vi scripts/ubuntu2004/boilerplate.sh
 ---
 > #install_jq
 > apt-get install -y jq
-36a38,41
-> 
-> # make kubelet refer to another resolv.conf in order to prevent DNS looping (please read https://github.com/coredns/coredns/blob/master/plugin/loop/README.md)
-> sed '/KUBELET_ARGS/ s/'"'"'$/'" --resolv-conf=\/run\/systemd\/resolve\/resolv.conf'"'/' /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf > /tmp/10-kubelet-args.conf
-> mv /tmp/10-kubelet-args.conf /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf
 ---
+```
+Next, add the following code lines to 'scripts/shared/eks.sh' as follows:
+```
+vi scripts/shared/eks.sh
+---
+140a141,144
+> # make kubelet refer to another resolv.conf in order to prevent DNS looping (please read https://github.com/coredns/coredns/blob/master/plugin/loop/README.md)
+> sed '/KUBELET_ARGS/ s/'"'"'$/'" --resolv-conf=\/run\/systemd\/resolve\/resolv.conf'"'/' /etc/eks/bootstrap.sh > /tmp/bootstrap.sh
+> mv /tmp/bootstrap.sh /etc/eks/bootstrap.sh
+>---
 ```
 
 ## Step 3: Bake your AMI
