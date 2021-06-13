@@ -52,11 +52,12 @@ Next, add the following code lines to 'scripts/shared/eks.sh' as follows:
 ```
 vi scripts/shared/eks.sh
 ---
-140a141,144
+138a139,143
+> #chmod +x /etc/eks/bootstrap.sh
+> 
 > # make kubelet refer to another resolv.conf in order to prevent DNS looping (please read https://github.com/coredns/coredns/blob/master/plugin/loop/README.md)
 > sed '/KUBELET_ARGS/ s/'"'"'$/'" --resolv-conf=\/run\/systemd\/resolve\/resolv.conf'"'/' /etc/eks/bootstrap.sh > /tmp/bootstrap.sh
 > mv /tmp/bootstrap.sh /etc/eks/bootstrap.sh
->
 ---
 ```
 
